@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
@@ -15,3 +15,4 @@ If you are developing a production application, we recommend using TypeScript wi
 # visitor-garden
 A real-time, ever-evolving world where each visitor causes a new plant to seed or grow. The site becomes a visual representation of collective human footprints — silent, beautiful, and alive.
 >>>>>>> 896711bd197f4fab4aed03a1502a3ff366406d81
+
