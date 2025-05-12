@@ -17,8 +17,8 @@ function App() {
       try {
         await addDoc(collection(db, "plants"), {
           createdAt: serverTimestamp(),
-          x: Math.floor(Math.random() * window.innerWidth),
-          y: Math.floor(Math.random() * (window.innerHeight - 150)), // leave room for heading
+         x: Math.floor(Math.random() * 5000),
+         y: Math.floor(Math.random() * 3000), // leave room for heading
         });
         console.log("🌱 New plant added!");
       } catch (err) {
@@ -29,6 +29,9 @@ function App() {
     addPlant();
   }, []);
 
+  useEffect(() => {
+  window.scrollTo(2000, 1000); // Start centered in the garden
+}, []);
   // Listen for live updates from Firestore
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "plants"), (snapshot) => {
@@ -40,10 +43,13 @@ function App() {
   }, []);
 
   return (
-    <div className="garden-container">
+  <div className="garden-container">
+    <div className="header">
       <h1>🌸 Visitor Garden</h1>
       <p>Total plants: {plants.length}</p>
+    </div>
 
+    <div className="scroll-wrapper">
       <div className="plant-field">
         {plants.map((plant, index) => (
           <div
@@ -58,7 +64,9 @@ function App() {
         ))}
       </div>
     </div>
-  );
+  </div>
+);
 }
+
 
 export default App;

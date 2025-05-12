@@ -1,47 +1,88 @@
 body {
   margin: 0;
+  background-color: #000000; /* plain color background */
+  background-image: none;
   font-family: "Segoe UI", sans-serif;
-  background-color: #e6f7ff;
- background-image: url("https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1740&q=80");
- /* sample fantasy garden */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
 }
 
 .garden-container {
-  padding: 2rem;
   position: relative;
+  width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background-color: rgba(255, 255, 255, 0.6); /* slight white overlay for readability */
-  backdrop-filter: blur(3px);
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 20px;
+  background-color: rgba(247, 102, 162, 0.8);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  margin: 1rem;
+  z-index: 10;
 }
 
 h1 {
-  margin-bottom: 0.5rem;
+  margin: 0 auto;
+  text-align: center;
+  font-size: 2.5rem;
   color: #356859;
   font-family: "Papyrus", fantasy;
   text-shadow: 2px 2px #ffffffaa;
+  padding: 1rem 0;
+}
+
+
+p {
+  font-size: 1.2rem;
+  font-style: italic;
+  color: #1b5e20; /* rich forest green */
+}
+
+
+.scroll-wrapper {
+  flex-grow: 1;
+  overflow: auto;
+  position: relative;
+  border: 2px dashed #aaa;
 }
 
 .plant-field {
   position: relative;
-  width: 100%;
-  height: 80%;
+  width: 5000px;
+  height: 3000px;
 }
 
 .plant {
-  width: 28px;
-  height: 28px;
-  background-image: url("https://img.icons8.com/?size=100&id=80791&format=png&color=000000");
+  width: 32px;
+  height: 32px;
+  background-image: url("plants/plant.png"); /* make sure this exists in public/plants/ */
   background-size: cover;
   background-repeat: no-repeat;
   position: absolute;
-  transition: transform 0.2s;
+  animation: growPlant 0.8s ease forwards;
+  transition: transform 0.2s, filter 0.3s;
 }
 
-
 .plant:hover {
-  transform: scale(1.3);
+  transform: scale(1.3) rotate(5deg);
+  filter: drop-shadow(0 0 6px #81c784);
+  cursor: pointer;
+}
+
+@keyframes growPlant {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
