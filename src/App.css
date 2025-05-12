@@ -31,15 +31,16 @@ body {
 h1 {
   margin: 0 auto;
   text-align: center;
-  font-size: 2.5rem;
-  color: #356859;
+  font-size: 4rem;
+  color: #02553c;
   font-family: "Papyrus", fantasy;
-  text-shadow: 2px 2px #ffffffaa;
-  padding: 1rem 0;
+  text-shadow: 2px 2px #000000aa;
+  padding: 2rem 0.5;
 }
 
 
 p {
+  
   font-size: 1.2rem;
   font-style: italic;
   color: #1b5e20; /* rich forest green */
@@ -49,7 +50,7 @@ p {
 .scroll-wrapper {
   flex-grow: 1;
   overflow: auto;
-  position: relative;
+  position:relative;
   border: 2px dashed #aaa;
 }
 
@@ -73,6 +74,7 @@ p {
 .plant:hover {
   transform: scale(1.3) rotate(5deg);
   filter: drop-shadow(0 0 6px #81c784);
+
   cursor: pointer;
 }
 
@@ -82,7 +84,7 @@ p {
     opacity: 0;
   }
   to {
-    transform: scale(1);
+    transform: scale(1.1);
     opacity: 1;
   }
 }
