@@ -51,6 +51,7 @@ p {
   flex-grow: 1;
   overflow: auto;
   position:relative;
+  overscroll-behavior: contain;
   border: 2px dashed #aaa;
 }
 
