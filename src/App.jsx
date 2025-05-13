@@ -33,52 +33,53 @@ function Button({ children, onClick, className = "" }) {
 
 function VisitorGardenUI({ onAddPlant, plantCount }) {
   return (
-    <main className="flex flex-col items-center justify-center p-6 gap-8 text-white">
-      <motion.h1
-        className="text-5xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500"
+    <main className="flex flex-col items-center justify-center p-6 gap-8 text-white min-h-screen w-full">
+      
+      <motion.div
+        className="header"
         initial={{ opacity: 0, y: -40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
       >
-        Welcome to Visitor Garden 🌿
-      </motion.h1>
-
-      <motion.p
-        className="text-xl max-w-xl text-center text-gray-300"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6, duration: 1 }}
-      >
-        A digital sanctuary of growth, mystery, and futuristic vibes.
-      </motion.p>
+        <div>
+          <h1>Welcome to Visitor Garden 🌿</h1>
+          <p>A digital sanctuary of growth, mystery, and futuristic vibes.</p>
+        </div>
+      </motion.div>
 
       <motion.div
-        className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"
+        className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 w-full max-w-4xl mx-auto px-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1, duration: 1 }}
       >
         <Card>
-          <h2 className="text-xl font-semibold mb-2">🌱 Plant a Tree</h2>
-          <p className="text-sm text-gray-400">Start your journey with your first plant.</p>
-          <Button 
-            onClick={onAddPlant}
-            className="bg-green-500 hover:bg-green-600 text-white"
-          >
-            Plant Now
-          </Button>
+          <h2 className="text-xl font-semibold mb-2 text-center">🌱 Plant a Tree</h2>
+          <p className="text-sm text-gray-400 text-center">Start your journey with your first plant.</p>
+          <div className="flex justify-center">
+            <Button 
+              onClick={onAddPlant}
+              className="bg-green-500 hover:bg-green-600 text-white"
+            >
+              Plant Now
+            </Button>
+          </div>
         </Card>
 
         <Card>
-          <h2 className="text-xl font-semibold mb-2">📈 Garden Stats</h2>
-          <p className="text-sm text-gray-400">Current plants: {plantCount}</p>
-          <Button className="bg-blue-500 hover:bg-blue-600 text-white">View Stats</Button>
+          <h2 className="text-xl font-semibold mb-2 text-center">📈 Garden Stats</h2>
+          <p className="text-sm text-gray-400 text-center">Current plants: {plantCount}</p>
+          <div className="flex justify-center">
+            <Button className="bg-blue-500 hover:bg-blue-600 text-white">View Stats</Button>
+          </div>
         </Card>
 
         <Card>
-          <h2 className="text-xl font-semibold mb-2">🧠 AI Assistant</h2>
-          <p className="text-sm text-gray-400">Talk to your digital garden guide.</p>
-          <Button className="bg-purple-500 hover:bg-purple-600 text-white">Ask Guide</Button>
+          <h2 className="text-xl font-semibold mb-2 text-center">🧠 AI Assistant</h2>
+          <p className="text-sm text-gray-400 text-center">Talk to your digital garden guide.</p>
+          <div className="flex justify-center">
+            <Button className="bg-purple-500 hover:bg-purple-600 text-white">Ask Guide</Button>
+          </div>
         </Card>
       </motion.div>
     </main>
@@ -123,6 +124,7 @@ function Minimap({ plants, containerRef }) {
   const minimapRef = useRef(null);
   const scale = 0.1;
   const [viewport, setViewport] = useState({ left: 0, top: 0, width: 0, height: 0 });
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const updateViewport = () => {
@@ -136,15 +138,26 @@ function Minimap({ plants, containerRef }) {
       }
     };
 
+    const handleMouseMove = (e) => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left + containerRef.current.scrollLeft;
+        const y = e.clientY - rect.top + containerRef.current.scrollTop;
+        setCursorPosition({ x, y });
+      }
+    };
+
     const container = containerRef.current;
     if (container) {
       container.addEventListener('scroll', updateViewport);
+      container.addEventListener('mousemove', handleMouseMove);
       updateViewport();
     }
 
     return () => {
       if (container) {
         container.removeEventListener('scroll', updateViewport);
+        container.removeEventListener('mousemove', handleMouseMove);
       }
     };
   }, [scale]);
@@ -164,11 +177,11 @@ function Minimap({ plants, containerRef }) {
 
   return (
     <div 
-    ref={minimapRef}
-    className="absolute bottom-4 left-4 w-60 h-40 bg-black/70 backdrop-blur-md rounded-xl border border-white/20 shadow-lg overflow-hidden cursor-pointer z-50"
-    onClick={handleMinimapClick}
-  >
-    <div className="text-xs text-white px-2 py-1 bg-white/10 rounded-t-xl">🗺 Minimap</div>
+      ref={minimapRef}
+      className="absolute bottom-4 left-4 w-60 h-40 bg-black/70 backdrop-blur-md rounded-xl border border-white/20 shadow-lg overflow-hidden cursor-pointer z-50"
+      onClick={handleMinimapClick}
+    >
+      <div className="text-xs text-white px-2 py-1 bg-white/10 rounded-t-xl">🗺 Minimap</div>
   
       <div className="relative w-full h-full">
         {plants.map((plant) => (
@@ -189,6 +202,14 @@ function Minimap({ plants, containerRef }) {
             width: `${viewport.width}px`,
             height: `${viewport.height}px`,
             backgroundColor: 'rgba(255, 255, 255, 0.05)',
+          }}
+        />
+        {/* Cursor indicator */}
+        <div
+          className="absolute w-2 h-2 bg-red-500 rounded-full transform -translate-x-1 -translate-y-1 animate-pulse"
+          style={{
+            left: `${cursorPosition.x * scale}px`,
+            top: `${cursorPosition.y * scale}px`,
           }}
         />
       </div>
@@ -263,34 +284,53 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 text-white">
-      <VisitorGardenUI onAddPlant={addPlant} plantCount={plants.length} />
+      <div className="container mx-auto px-4">
+        <VisitorGardenUI onAddPlant={addPlant} plantCount={plants.length} />
 
-      <div className="garden-container px-8 pb-8 pt-4 relative">
-  <h2 className="text-2xl font-bold text-white mb-4">🌳 Your Garden</h2>
+        <div className="garden-container pb-8 pt-4 relative flex flex-col items-center justify-center">
+          <h2 className="text-2xl font-bold text-white mb-4 text-center">🌳 Your Garden</h2>
 
-  <Minimap plants={plants} containerRef={containerRef} />
+          <Minimap plants={plants} containerRef={containerRef} />
 
-  <div 
-    ref={containerRef}
-    className="scroll-wrapper overflow-auto border border-white/10 rounded-lg h-[600px] relative"
-  >
-    <div 
-      className="plant-field relative w-[5000px] h-[3000px] bg-gradient-to-br from-green-900/50 to-blue-900/50"
-      style={{
-        backgroundImage: `
-          linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)
-        `,
-        backgroundSize: '50px 50px',
-      }}
-    >
-      {plants.map((plant, index) => (
-        <Plant key={plant.id || index} plant={plant} index={index} />
-      ))}
-    </div>
-  </div>
-</div>
+          <div 
+            ref={containerRef}
+            className="scroll-wrapper overflow-y-auto overflow-x-hidden border border-white/10 rounded-lg h-[600px] relative pb-[30px] w-full max-w-5xl mx-auto"
+          >
+            <div 
+              className="plant-field relative w-[5000px] h-[3000px] mb-[30px] rounded-[5px]"
+              style={{
+                backgroundColor: '#5C4033', // soil brown
+                backgroundImage: `
+                  url('https://www.transparenttextures.com/patterns/crissxcross.png'),
+                  linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+                  linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)
+                `,
+                backgroundSize: 'auto, 50px 50px, 50px 50px',
+                backgroundRepeat: 'repeat',
+                boxShadow: 'inset 0 0 0 20px #064e3b' // dark green border inside
+              }}
+            >
+              {/* Floating dust particles */}
+              {[...Array(20)].map((_, i) => (
+                <div
+                  key={i}
+                  className="dust"
+                  style={{
+                    left: `${Math.random() * 5000}px`,
+                    top: `${Math.random() * 3000}px`,
+                    animationDelay: `${Math.random() * 5}s`,
+                  }}
+                />
+              ))}
 
+              {/* Render plants */}
+              {plants.map((plant, index) => (
+                <Plant key={plant.id || index} plant={plant} index={index} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,11 +1,13 @@
 body {
+  text-align: center;
   margin: 0;
-  background-color: #000000; /* plain color background */
+  background-color: #c5f006c0; /* plain color background */
   background-image: none;
   font-family: "Segoe UI", sans-serif;
 }
 
 .garden-container {
+  text-align: center;
   position: relative;
   width: 100vw;
   height: 100vh;
@@ -20,7 +22,7 @@ body {
   align-items: center;
   text-align: center;
   margin-bottom: 20px;
-  background-color: rgba(247, 102, 162, 0.8);
+  background-color: rgba(248, 246, 247, 0.8);
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
@@ -40,7 +42,7 @@ h1 {
 
 
 p {
-  
+  text-align: center;
   font-size: 1.2rem;
   font-style: italic;
   color: #1b5e20; /* rich forest green */
@@ -52,10 +54,16 @@ p {
   overflow: auto;
   position:relative;
   overscroll-behavior: contain;
-  border: 2px dashed #aaa;
+  border: 0.1px dashed #000000;
 }
+/*
+.scroll-wrapper::-webkit-scrollbar {
+  height: 0px;
+}*/
+
 
 .plant-field {
+  /*color:brown;*/
   position: relative;
   width: 5000px;
   height: 3000px;
@@ -89,3 +97,29 @@ p {
     opacity: 1;
   }
 }
+
+@keyframes floatDust {
+  0% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-10px) translateX(10px);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.3;
+  }
+}
+
+.dust {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  animation: floatDust 5s infinite ease-in-out;
+  pointer-events: none;
+}
+
