@@ -16,6 +16,126 @@ body {
   flex-direction: column;
 }
 
+.raindrop {
+  position: absolute;
+  width: 2px;
+  height: 15px;
+  background: rgba(255, 255, 255, 0.6);
+  animation: fall 1s linear infinite;
+  top: -20px;
+  left: calc(var(--x, 0) * 100vw);
+
+  animation-delay: calc(0.02s * var(--i));
+  transform-origin: center;
+}
+
+.snowflake {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.8;
+  top: -10px;
+  left: calc(var(--x, 0) * 100vw);
+
+  animation: snow 5s linear infinite;
+  animation-delay: calc(0.1s * var(--i));
+  transform-origin: center;
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  100% {
+    transform: translateY(100vh) translateX(20px);
+  }
+}
+
+@keyframes snow {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(50vh) translateX(50px) rotate(180deg);
+  }
+  100% {
+    transform: translateY(100vh) translateX(0) rotate(360deg);
+  }
+}
+
+.leaf {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background-image: url('/assets/leaf.png'); /* Add your leaf image */
+  background-size: contain;
+  background-repeat: no-repeat;
+  animation: fallLeaf 8s linear infinite;
+  top: -40px;
+  left: calc(100% * var(--x, 0));
+  animation-delay: calc(0.3s * var(--i));
+  opacity: 0.8;
+}
+
+@keyframes fallLeaf {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+  }
+}
+
+.lightning-flash {
+  position: absolute;
+  inset: 0;
+  background: white;
+  opacity: 0;
+  animation: lightningFlash 5s infinite;
+  z-index: 40;
+  pointer-events: none;
+}
+
+@keyframes lightningFlash {
+  0%, 97%, 100% {
+    opacity: 0;
+  }
+  98% {
+    opacity: 0.7;
+  }
+  99% {
+    opacity: 0.2;
+  }
+}
+
+.cloud {
+  position: absolute;
+  top: 50px;
+  width: 200px;
+  height: 100px;
+  background-image: url('/assets/cloud.png'); /* cloud image */
+  background-size: cover;
+  animation: moveCloud 60s linear infinite;
+  opacity: 0.8;
+  z-index: 10;
+}
+
+.cloud:nth-child(odd) {
+  top: 100px;
+  animation-duration: 90s;
+}
+
+@keyframes moveCloud {
+  0% {
+    left: -250px;
+  }
+  100% {
+    left: 100vw;
+  }
+}
+
 .header {
   display: flex;
   justify-content: center;

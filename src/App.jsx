@@ -5,6 +5,9 @@ import {
   addDoc,
   onSnapshot,
   serverTimestamp,
+  doc,
+  getDoc,
+  setDoc,
 } from "firebase/firestore";
 import "./App.css";
 import "./index.css";
@@ -89,7 +92,8 @@ function VisitorGardenUI({ onAddPlant, plantCount }) {
 function Plant({ plant, index }) {
   const [isHovered, setIsHovered] = useState(false);
   const emojis = ['🌱', '🌿', '🌳'];
-  const type = plant.type || Math.floor(Math.random() * 3);
+  //const type = plant.type || Math.floor(Math.random() * 3);
+  const type = plant.type ?? 0; // fallback to default if somehow missing
 
   return (
     <motion.div
@@ -217,11 +221,47 @@ function Minimap({ plants, containerRef }) {
   );
 }
 
+
+function WeatherOverlay({ mode }) {
+  if (mode === "sunny") return null;
+
+  const count = mode === "rainy" || mode === "storm" ? 80 : mode === "snowy" ? 50 : 30;
+  const elementClass = mode === "rainy" || mode === "storm" ? "raindrop" : mode === "snowy" ? "snowflake" : "leaf";
+
+  return (
+    <>
+      {/* Precipitation or leaves */}
+      <div className="pointer-events-none absolute inset-0 z-30 overflow-hidden">
+        {[...Array(count)].map((_, i) => (
+          <div
+            key={i}
+            className={elementClass}
+            style={{ "--i": i, "--x": Math.random() }}
+          />
+        ))}
+      </div>
+
+      {/* Lightning flash effect for storm */}
+      {mode === "storm" && <div className="lightning-flash" />}
+
+      {/* Moving clouds for storm, breezy or cloudy mode */}
+      {["storm", "breezy", "cloudy"].includes(mode) && (
+        <div className="pointer-events-none absolute inset-0 z-20">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="cloud" />
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+
 function App() {
   const [plants, setPlants] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const containerRef = useRef(null);
-
+  const [weatherMode, setWeatherMode] = useState("sunny");
   // Handle music
   useEffect(() => {
     const audio = new Audio('/washing-machine-heart.mp3');
@@ -247,16 +287,45 @@ function App() {
     };
   };
 
+  const checkVisitorPlant = async () => {
+    const visitorId = localStorage.getItem("visitorId");
+    if (!visitorId) return false;
+    
+    const visitorRef = doc(db, "visitors", visitorId);
+    const visitorSnap = await getDoc(visitorRef);
+    
+    return visitorSnap.exists() && visitorSnap.data().hasPlanted;
+  };
+
   const addPlant = async () => {
     try {
+       // Check if visitor has already planted
+    const hasPlanted = await checkVisitorPlant();
+    if (hasPlanted) {
+      alert("You have already planted a tree in this garden! 🌳");
+      return;
+    }
       setIsLoading(true);
       const position = getRandomPosition();
+
+      const visitorId = localStorage.getItem("visitorId") || crypto.randomUUID();
+      localStorage.setItem("visitorId", visitorId);
+    
       await addDoc(collection(db, "plants"), {
         createdAt: serverTimestamp(),
         x: position.x,
         y: position.y,
         type: Math.floor(Math.random() * 3),
+        visitorId: visitorId
       });
+
+       // Mark visitor as having planted
+    const visitorRef = doc(db, "visitors", visitorId);
+    await setDoc(visitorRef, {
+      hasPlanted: true,
+      lastPlanted: serverTimestamp()
+    }, { merge: true });
+
       console.log("🌱 New plant added!");
     } catch (err) {
       console.error("Error adding plant:", err);
@@ -281,9 +350,28 @@ function App() {
     });
     return () => unsubscribe();
   }, []);
+   
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      containerRef.current?.scrollTo(2000, 1000);
+    }, 300); // Delay ensures layout is rendered
+    return () => clearTimeout(timeout);
+  }, [plants]); // Trigger after plants are loaded
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 text-white">
+      <WeatherOverlay mode={weatherMode} />
+
+      <div className="fixed top-4 right-4 z-50 space-x-2 bg-black/30 px-3 py-2 rounded-xl border border-white/20 text-sm">
+  <button onClick={() => setWeatherMode("sunny")} className="hover:underline">☀️ Sunny</button>
+  <button onClick={() => setWeatherMode("rainy")} className="hover:underline">🌧️ Rain</button>
+  <button onClick={() => setWeatherMode("snowy")} className="hover:underline">❄️ Snow</button>
+  <button onClick={() => setWeatherMode("breezy")} className="hover:underline">🍃 Breezy</button>
+  <button onClick={() => setWeatherMode("storm")} className="hover:underline">⛈️ Storm</button>
+</div>
+
+
       <div className="container mx-auto px-4">
         <VisitorGardenUI onAddPlant={addPlant} plantCount={plants.length} />
 
