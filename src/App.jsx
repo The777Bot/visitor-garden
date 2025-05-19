@@ -12,6 +12,7 @@ import {
 import "./App.css";
 import "./index.css";
 import { motion } from "framer-motion";
+import PlantGlobe from './components/PlantGlobe';
 
 // Move this inside App or useEffect inside component
 // Otherwise it's a side effect at top level, which is invalid
@@ -96,7 +97,7 @@ function Plant({ countryCode, plant, index }) {
     const codePoints = code.toUpperCase().split('').map(char => 127397 + char.charCodeAt());
     return String.fromCodePoint(...codePoints);
   };
-  
+
   return (
     <motion.div
       className="absolute"
@@ -411,7 +412,7 @@ function App() {
     };
   }, []);
 
-  
+
   const getRandomPosition = () => {
     const padding = 100;
     const maxX = 5000 - padding;
@@ -535,74 +536,72 @@ function App() {
   }, [plants]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 text-white">
-      <WeatherOverlay mode={weatherMode} />
-
-      <div className="fixed top-4 right-4 z-50 space-x-2 bg-black/30 px-3 py-2 rounded-xl border border-white/20 text-sm">
-        <button onClick={() => setWeatherMode("sunny")} className="hover:underline">☀️ Sunny</button>
-        <button onClick={() => setWeatherMode("rainy")} className="hover:underline">🌧️ Rain</button>
-        <button onClick={() => setWeatherMode("snowy")} className="hover:underline">❄️ Snow</button>
-        <button onClick={() => setWeatherMode("breezy")} className="hover:underline">🍃 Breezy</button>
-        <button onClick={() => setWeatherMode("storm")} className="hover:underline">⛈️ Storm</button>
+    <div className="relative w-screen h-screen overflow-hidden">
+      {/* Clouds Layer */}
+      <div className="pointer-events-none absolute inset-0 z-10">
+        {weatherMode === "breezy" || weatherMode === "storm" ? (
+          <div className="w-full h-full animate-clouds bg-[url('/clouds.png')] bg-repeat-x opacity-60"></div>
+        ) : null}
       </div>
-
-      <div className="container mx-auto px-4">
-        <VisitorGardenUI 
-          onAddPlant={addPlant} 
-          plantCount={plants.length} 
-          onViewStats={() => setIsStatsOpen(true)}
-        />
-
-        <StatsModal 
-          isOpen={isStatsOpen}
-          onClose={() => setIsStatsOpen(false)}
-          plants={plants}
-        />
-
-        <div className="garden-container pb-8 pt-4 relative flex flex-col items-center justify-center">
-          <h2 className="text-2xl font-bold text-white mb-4 text-center">🌳 Your Garden</h2>
-
-          <Minimap plants={plants} containerRef={containerRef} />
-
-          <div 
-            ref={containerRef}
-            className="scroll-wrapper overflow-y-auto overflow-x-hidden border border-white/10 rounded-lg h-[600px] relative pb-[30px] w-full max-w-5xl mx-auto"
-          >
-            <div 
-              className="plant-field relative w-[5000px] h-[3000px] mb-[30px] rounded-[5px]"
+  
+      {/* Leaves Layer */}
+      {weatherMode === "breezy" && (
+        <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-4 h-4 text-green-300 animate-fall"
               style={{
-                backgroundColor: '#5C4033',
-                backgroundImage: `
-                  url('https://www.transparenttextures.com/patterns/crissxcross.png'),
-                  linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
-                  linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)
-                `,
-                backgroundSize: 'auto, 50px 50px, 50px 50px',
-                backgroundRepeat: 'repeat',
-                boxShadow: 'inset 0 0 0 20px #064e3b'
+                left: `${Math.random() * 100}%`,
+                animationDuration: `${3 + Math.random() * 4}s`,
+                animationDelay: `${Math.random() * 5}s`,
               }}
             >
-              {[...Array(20)].map((_, i) => (
-                <div
-                  key={i}
-                  className="dust"
-                  style={{
-                    left: `${Math.random() * 5000}px`,
-                    top: `${Math.random() * 3000}px`,
-                    animationDelay: `${Math.random() * 5}s`,
-                  }}
-                />
-              ))}
-
-              {plants.map((plant, index) => (
-                <Plant key={plant.id || index} plant={plant} index={index} />
-              ))}
+              🍂
             </div>
+          ))}
+        </div>
+      )}
+  
+      {/* Lightning Flash */}
+      {weatherMode === "storm" && (
+        <div className="pointer-events-none absolute inset-0 z-30">
+          <div className="absolute w-full h-full bg-white animate-lightning opacity-0"></div>
+        </div>
+      )}
+  
+      <div
+        ref={containerRef}
+        className="relative w-[6000px] h-[10000px] overflow-auto bg-gradient-to-br from-green-900 via-green-800 to-gray-900"
+      >
+        <div className="fixed top-4 right-4 z-50 space-x-2 bg-black/30 px-3 py-2 rounded-xl border border-white/20 text-sm">
+          <button onClick={() => setWeatherMode("sunny")} className="hover:underline">☀️ Sunny</button>
+          <button onClick={() => setWeatherMode("rainy")} className="hover:underline">🌧️ Rain</button>
+          <button onClick={() => setWeatherMode("snowy")} className="hover:underline">❄️ Snow</button>
+          <button onClick={() => setWeatherMode("breezy")} className="hover:underline">🍃 Breezy</button>
+          <button onClick={() => setWeatherMode("storm")} className="hover:underline">⛈️ Storm</button>
+        </div>
+  
+        <div className="container mx-auto px-4">
+          <VisitorGardenUI 
+            onAddPlant={addPlant} 
+            plantCount={plants.length} 
+            onViewStats={() => setIsStatsOpen(true)}
+          />
+  
+          <StatsModal 
+            isOpen={isStatsOpen}
+            onClose={() => setIsStatsOpen(false)}
+            plants={plants}
+          />
+  
+          <div className="garden-container pb-8 pt-4 relative flex flex-col items-center justify-center bg-transparent">
+            <h2 className="text-2xl font-bold text-white mb-4 text-center">🌍 Global Garden</h2>
+            <PlantGlobe plants={plants} />
           </div>
         </div>
       </div>
     </div>
   );
 }
-
 export default App;
