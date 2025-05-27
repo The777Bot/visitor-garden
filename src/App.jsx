@@ -34,10 +34,9 @@ function Button({ children, onClick, className = "" }) {
   );
 }
 
-function VisitorGardenUI({ onAddPlant, plantCount }) {
+function VisitorGardenUI({ onAddPlant, plantCount, onViewStats, isLoading }) {
   return (
     <main className="flex flex-col items-center justify-center p-6 gap-8 text-white min-h-screen w-full">
-      
       <motion.div
         className="header"
         initial={{ opacity: 0, y: -40 }}
@@ -49,6 +48,13 @@ function VisitorGardenUI({ onAddPlant, plantCount }) {
           <p>A digital sanctuary of growth, mystery, and futuristic vibes.</p>
         </div>
       </motion.div>
+
+      {isLoading && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 text-white">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-green-400" />
+          <p className="ml-4 text-lg">Loading your garden...</p>
+        </div>
+      )}
 
       <motion.div
         className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 w-full max-w-4xl mx-auto px-4"
@@ -73,7 +79,12 @@ function VisitorGardenUI({ onAddPlant, plantCount }) {
           <h2 className="text-xl font-semibold mb-2 text-center">📈 Garden Stats</h2>
           <p className="text-sm text-gray-400 text-center">Current plants: {plantCount}</p>
           <div className="flex justify-center">
-            <Button className="bg-blue-500 hover:bg-blue-600 text-white">View Stats</Button>
+            <Button 
+              onClick={onViewStats}
+              className="bg-blue-500 hover:bg-blue-600 text-white"
+            >
+              View Stats
+            </Button>
           </div>
         </Card>
 
@@ -227,7 +238,8 @@ function WeatherOverlay({ mode }) {
 
   const count = mode === "rainy" || mode === "storm" ? 80 : mode === "snowy" ? 50 : 30;
   const elementClass = mode === "rainy" || mode === "storm" ? "raindrop" : mode === "snowy" ? "snowflake" : "leaf";
-
+  
+  
   return (
     <>
       {/* Precipitation or leaves */}
@@ -256,6 +268,11 @@ function WeatherOverlay({ mode }) {
   );
 }
 
+function StatsModal({ isOpen, onClose, plants }) {
+  if (!isOpen) return null;
+  
+  // ... rest of the StatsModal implementation ...
+}
 
 function App() {
   const [plants, setPlants] = useState([]);
@@ -298,16 +315,19 @@ function App() {
   };
 
   const addPlant = async () => {
-    try {
-       // Check if visitor has already planted
-    const hasPlanted = await checkVisitorPlant();
-    if (hasPlanted) {
-      alert("You have already planted a tree in this garden! 🌳");
+    if (isLoading) {
+      alert("Loading... Please wait a moment before planting. 🌱");
       return;
     }
+    try {
+      const hasPlanted = await checkVisitorPlant();
+      if (hasPlanted) {
+        alert("You have already planted a tree in this garden! 🌳");
+        return;
+      }
       setIsLoading(true);
       const position = getRandomPosition();
-
+      
       const visitorId = localStorage.getItem("visitorId") || crypto.randomUUID();
       localStorage.setItem("visitorId", visitorId);
     
@@ -319,12 +339,11 @@ function App() {
         visitorId: visitorId
       });
 
-       // Mark visitor as having planted
-    const visitorRef = doc(db, "visitors", visitorId);
-    await setDoc(visitorRef, {
-      hasPlanted: true,
-      lastPlanted: serverTimestamp()
-    }, { merge: true });
+      const visitorRef = doc(db, "visitors", visitorId);
+      await setDoc(visitorRef, {
+        hasPlanted: true,
+        lastPlanted: serverTimestamp()
+      }, { merge: true });
 
       console.log("🌱 New plant added!");
     } catch (err) {
@@ -354,9 +373,9 @@ function App() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       containerRef.current?.scrollTo(2000, 1000);
-    }, 300); // Delay ensures layout is rendered
+    }, 300);
     return () => clearTimeout(timeout);
-  }, [plants]); // Trigger after plants are loaded
+  }, [plants]);
   
 
   return (
@@ -371,6 +390,12 @@ function App() {
   <button onClick={() => setWeatherMode("storm")} className="hover:underline">⛈️ Storm</button>
 </div>
 
+      <Button
+        onClick={() => containerRef.current?.scrollTo(2000, 1000)}
+        className="bg-yellow-500 hover:bg-yellow-600 text-white fixed bottom-4 right-4 z-50"
+      >
+        Center View
+      </Button>
 
       <div className="container mx-auto px-4">
         <VisitorGardenUI onAddPlant={addPlant} plantCount={plants.length} />
