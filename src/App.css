@@ -76,7 +76,6 @@ body {
   top: -40px;
   left: calc(100% * var(--x, 0));
   animation-delay: calc(0.3s * var(--i));
-  transform: rotate(var(--rotation));
   opacity: 0.8;
 }
 
@@ -113,12 +112,12 @@ body {
 
 .cloud {
   position: absolute;
-  top: 10px;
-  width: 300px;
+  top: 50px;
+  width: 200px;
   height: 100px;
   background-image: url('/assets/cloud.png'); /* cloud image */
   background-size: cover;
-  animation: drift 60s linear infinite;
+  animation: moveCloud 60s linear infinite;
   opacity: 0.8;
   z-index: 10;
 }
