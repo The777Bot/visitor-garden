@@ -12,7 +12,6 @@ import {
 import "./App.css";
 import "./index.css";
 import { motion } from "framer-motion";
-import PlantGlobe from './components/PlantGlobe';
 
 // Move this inside App or useEffect inside component
 // Otherwise it's a side effect at top level, which is invalid
@@ -35,7 +34,7 @@ function Button({ children, onClick, className = "" }) {
   );
 }
 
-function VisitorGardenUI({ onAddPlant, plantCount, onViewStats }) {
+function VisitorGardenUI({ onAddPlant, plantCount }) {
   return (
     <main className="flex flex-col items-center justify-center p-6 gap-8 text-white min-h-screen w-full">
       
@@ -52,7 +51,7 @@ function VisitorGardenUI({ onAddPlant, plantCount, onViewStats }) {
       </motion.div>
 
       <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 w-full max-w-4xl mx-auto px-4"
+        className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 w-full max-w-4xl mx-auto px-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1, duration: 1 }}
@@ -74,12 +73,15 @@ function VisitorGardenUI({ onAddPlant, plantCount, onViewStats }) {
           <h2 className="text-xl font-semibold mb-2 text-center">📈 Garden Stats</h2>
           <p className="text-sm text-gray-400 text-center">Current plants: {plantCount}</p>
           <div className="flex justify-center">
-            <Button 
-              onClick={onViewStats}
-              className="bg-blue-500 hover:bg-blue-600 text-white"
-            >
-              View Stats
-            </Button>
+            <Button className="bg-blue-500 hover:bg-blue-600 text-white">View Stats</Button>
+          </div>
+        </Card>
+
+        <Card>
+          <h2 className="text-xl font-semibold mb-2 text-center">🧠 AI Assistant</h2>
+          <p className="text-sm text-gray-400 text-center">Talk to your digital garden guide.</p>
+          <div className="flex justify-center">
+            <Button className="bg-purple-500 hover:bg-purple-600 text-white">Ask Guide</Button>
           </div>
         </Card>
       </motion.div>
@@ -87,16 +89,11 @@ function VisitorGardenUI({ onAddPlant, plantCount, onViewStats }) {
   );
 }
 
-function Plant({ countryCode, plant, index }) {
+function Plant({ plant, index }) {
   const [isHovered, setIsHovered] = useState(false);
   const emojis = ['🌱', '🌿', '🌳'];
-  const type = plant.type ?? 0;
-  
-  const getCountryFlag = (code) => {
-    if (!code) return '🌐';
-    const codePoints = code.toUpperCase().split('').map(char => 127397 + char.charCodeAt());
-    return String.fromCodePoint(...codePoints);
-  };
+  //const type = plant.type || Math.floor(Math.random() * 3);
+  const type = plant.type ?? 0; // fallback to default if somehow missing
 
   return (
     <motion.div
@@ -121,15 +118,11 @@ function Plant({ countryCode, plant, index }) {
           <div className="text-xs text-gray-200">
             {plant.createdAt?.toDate().toLocaleDateString()}
           </div>
-          <div className="text-xs text-gray-200 mt-1">
-            {getCountryFlag(plant.countryCode)}
-          </div>
         </div>
       )}
     </motion.div>
   );
 }
-
 
 function Minimap({ plants, containerRef }) {
   const minimapRef = useRef(null);
@@ -263,141 +256,13 @@ function WeatherOverlay({ mode }) {
   );
 }
 
-function StatsModal({ isOpen, onClose, plants }) {
-  if (!isOpen) return null;
-
-  // Calculate statistics
-  const totalPlants = plants.length;
-  const plantTypes = plants.reduce((acc, plant) => {
-    acc[plant.type] = (acc[plant.type] || 0) + 1;
-    return acc;
-  }, {});
-
-  // Calculate country distribution
-  const countryDistribution = plants.reduce((acc, plant) => {
-    acc[plant.countryCode] = (acc[plant.countryCode] || 0) + 1;
-    return acc;
-  }, {});
-
-  const emojis = ['🌱', '🌿', '🌳'];
-  
-  // Function to get country flag emoji from country code
-  const getCountryFlag = (countryCode) => {
-    if (!countryCode || countryCode === "Unknown") return "🌐";
-    
-    // Convert country code to flag emoji
-    const codePoints = countryCode
-      .toUpperCase()
-      .split('')
-      .map(char => 127397 + char.charCodeAt());
-    return String.fromCodePoint(...codePoints);
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-      <motion.div 
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-6 max-w-lg w-full mx-4"
-      >
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-white">🌳 Garden Statistics</h2>
-          <button 
-            onClick={onClose}
-            className="text-white/60 hover:text-white"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          <div className="bg-white/5 rounded-xl p-4">
-            <h3 className="text-lg font-semibold mb-2">Total Plants</h3>
-            <p className="text-3xl font-bold text-green-400">{totalPlants}</p>
-          </div>
-
-          <div className="bg-white/5 rounded-xl p-4">
-            <h3 className="text-lg font-semibold mb-2">Plant Types</h3>
-            <div className="grid grid-cols-3 gap-4">
-              {Object.entries(plantTypes).map(([type, count]) => (
-                <div key={type} className="text-center">
-                  <div className="text-2xl mb-1">{emojis[type]}</div>
-                  <div className="text-sm text-white/60">Count: {count}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white/5 rounded-xl p-4">
-            <h3 className="text-lg font-semibold mb-2">Global Distribution</h3>
-            <div className="grid grid-cols-2 gap-2">
-              {Object.entries(countryDistribution)
-                .sort(([,a], [,b]) => b - a)
-                .map(([countryCode, count]) => (
-                  <div key={countryCode} className="flex items-center justify-between text-sm">
-                    <span className="text-xl">{getCountryFlag(countryCode)}</span>
-                    <span className="text-white/60">{count}</span>
-                  </div>
-                ))}
-            </div>
-          </div>
-
-          <div className="bg-white/5 rounded-xl p-4">
-            <h3 className="text-lg font-semibold mb-2">Recent Activity</h3>
-            <div className="space-y-2">
-              {plants
-                .sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate())
-                .slice(0, 5)
-                .map((plant, index) => (
-                  <div key={plant.id} className="flex items-center gap-2 text-sm">
-                    <span>{emojis[plant.type]}</span>
-                    <span>Plant #{index + 1}</span>
-                    <span className="text-white/60">
-                      {plant.createdAt?.toDate().toLocaleDateString()}
-                    </span>
-                  </div>
-                ))}
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </div>
-  );
-}
-
-const getLocationFromBrowser = () => {
-  return new Promise((resolve, reject) => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            // Use reverse geocoding to get country from coordinates
-            const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`
-            );
-            const data = await response.json();
-            resolve(data.address.country_code);
-          } catch (err) {
-            reject(err);
-          }
-        },
-        (error) => {
-          reject(error);
-        }
-      );
-    } else {
-      reject(new Error("Geolocation not available"));
-    }
-  });
-};
 
 function App() {
   const [plants, setPlants] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isStatsOpen, setIsStatsOpen] = useState(false);
   const containerRef = useRef(null);
   const [weatherMode, setWeatherMode] = useState("sunny");
-
+  // Handle music
   useEffect(() => {
     const audio = new Audio('/washing-machine-heart.mp3');
     audio.loop = true;
@@ -411,7 +276,6 @@ function App() {
       window.removeEventListener("click", playAudio);
     };
   }, []);
-
 
   const getRandomPosition = () => {
     const padding = 100;
@@ -435,73 +299,32 @@ function App() {
 
   const addPlant = async () => {
     try {
-      // Check if visitor has already planted
-      const hasPlanted = await checkVisitorPlant();
-      if (hasPlanted) {
-        alert("You have already planted a tree in this garden! 🌳");
-        return;
-      }
-
+       // Check if visitor has already planted
+    const hasPlanted = await checkVisitorPlant();
+    if (hasPlanted) {
+      alert("You have already planted a tree in this garden! 🌳");
+      return;
+    }
       setIsLoading(true);
       const position = getRandomPosition();
 
-      // Try multiple geolocation services
-      let countryCode = "Unknown";
-      try {
-        // First try ipapi.co
-        try {
-          const response = await fetch('https://ipapi.co/json/');
-          if (response.ok) {
-            const data = await response.json();
-            console.log("ipapi.co response:", data);
-            if (data.country_code) {
-              countryCode = data.country_code;
-              console.log("Country code from ipapi.co:", countryCode);
-            }
-          }
-        } catch (err) {
-          console.log("ipapi.co failed, trying ipinfo.io");
-        }
-
-        // If ipapi.co failed, try ipinfo.io
-        if (countryCode === "Unknown") {
-          const response = await fetch('https://ipinfo.io/json');
-          if (response.ok) {
-            const data = await response.json();
-            console.log("ipinfo.io response:", data);
-            if (data.country) {
-              countryCode = data.country;
-              console.log("Country code from ipinfo.io:", countryCode);
-            }
-          }
-        }
-      } catch (err) {
-        console.error("Error getting country from all services:", err);
-      }
-
       const visitorId = localStorage.getItem("visitorId") || crypto.randomUUID();
       localStorage.setItem("visitorId", visitorId);
-      
-      // Log the plant data before saving
-      const plantData = {
+    
+      await addDoc(collection(db, "plants"), {
         createdAt: serverTimestamp(),
         x: position.x,
         y: position.y,
         type: Math.floor(Math.random() * 3),
-        visitorId: visitorId,
-        countryCode: countryCode
-      };
-      console.log("Saving plant with data:", plantData);
+        visitorId: visitorId
+      });
 
-      await addDoc(collection(db, "plants"), plantData);
-
-      // Mark visitor as having planted
-      const visitorRef = doc(db, "visitors", visitorId);
-      await setDoc(visitorRef, {
-        hasPlanted: true,
-        lastPlanted: serverTimestamp(),
-        countryCode: countryCode
-      }, { merge: true });
+       // Mark visitor as having planted
+    const visitorRef = doc(db, "visitors", visitorId);
+    await setDoc(visitorRef, {
+      hasPlanted: true,
+      lastPlanted: serverTimestamp()
+    }, { merge: true });
 
       console.log("🌱 New plant added!");
     } catch (err) {
@@ -513,7 +336,7 @@ function App() {
 
   useEffect(() => {
     const wrapper = document.querySelector(".scroll-wrapper");
-    if (wrapper) wrapper.scrollTo(2000, 1000);
+    if (wrapper) wrapper.scrollTo(2000, 1000); // center
   }, []);
 
   useEffect(() => {
@@ -527,81 +350,77 @@ function App() {
     });
     return () => unsubscribe();
   }, []);
-
+   
   useEffect(() => {
     const timeout = setTimeout(() => {
       containerRef.current?.scrollTo(2000, 1000);
-    }, 300);
+    }, 300); // Delay ensures layout is rendered
     return () => clearTimeout(timeout);
-  }, [plants]);
+  }, [plants]); // Trigger after plants are loaded
+  
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden">
-      {/* Clouds Layer */}
-      <div className="pointer-events-none absolute inset-0 z-10">
-        {weatherMode === "breezy" || weatherMode === "storm" ? (
-          <div className="w-full h-full animate-clouds bg-[url('/clouds.png')] bg-repeat-x opacity-60"></div>
-        ) : null}
-      </div>
-  
-      {/* Leaves Layer */}
-      {weatherMode === "breezy" && (
-        <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-4 h-4 text-green-300 animate-fall"
+    <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 text-white">
+      <WeatherOverlay mode={weatherMode} />
+
+      <div className="fixed top-4 right-4 z-50 space-x-2 bg-black/30 px-3 py-2 rounded-xl border border-white/20 text-sm">
+  <button onClick={() => setWeatherMode("sunny")} className="hover:underline">☀️ Sunny</button>
+  <button onClick={() => setWeatherMode("rainy")} className="hover:underline">🌧️ Rain</button>
+  <button onClick={() => setWeatherMode("snowy")} className="hover:underline">❄️ Snow</button>
+  <button onClick={() => setWeatherMode("breezy")} className="hover:underline">🍃 Breezy</button>
+  <button onClick={() => setWeatherMode("storm")} className="hover:underline">⛈️ Storm</button>
+</div>
+
+
+      <div className="container mx-auto px-4">
+        <VisitorGardenUI onAddPlant={addPlant} plantCount={plants.length} />
+
+        <div className="garden-container pb-8 pt-4 relative flex flex-col items-center justify-center">
+          <h2 className="text-2xl font-bold text-white mb-4 text-center">🌳 Your Garden</h2>
+
+          <Minimap plants={plants} containerRef={containerRef} />
+
+          <div 
+            ref={containerRef}
+            className="scroll-wrapper overflow-y-auto overflow-x-hidden border border-white/10 rounded-lg h-[600px] relative pb-[30px] w-full max-w-5xl mx-auto"
+          >
+            <div 
+              className="plant-field relative w-[5000px] h-[3000px] mb-[30px] rounded-[5px]"
               style={{
-                left: `${Math.random() * 100}%`,
-                animationDuration: `${3 + Math.random() * 4}s`,
-                animationDelay: `${Math.random() * 5}s`,
+                backgroundColor: '#5C4033', // soil brown
+                backgroundImage: `
+                  url('https://www.transparenttextures.com/patterns/crissxcross.png'),
+                  linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+                  linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)
+                `,
+                backgroundSize: 'auto, 50px 50px, 50px 50px',
+                backgroundRepeat: 'repeat',
+                boxShadow: 'inset 0 0 0 20px #064e3b' // dark green border inside
               }}
             >
-              🍂
+              {/* Floating dust particles */}
+              {[...Array(20)].map((_, i) => (
+                <div
+                  key={i}
+                  className="dust"
+                  style={{
+                    left: `${Math.random() * 5000}px`,
+                    top: `${Math.random() * 3000}px`,
+                    animationDelay: `${Math.random() * 5}s`,
+                  }}
+                />
+              ))}
+
+              {/* Render plants */}
+              {plants.map((plant, index) => (
+                <Plant key={plant.id || index} plant={plant} index={index} />
+              ))}
             </div>
-          ))}
-        </div>
-      )}
-  
-      {/* Lightning Flash */}
-      {weatherMode === "storm" && (
-        <div className="pointer-events-none absolute inset-0 z-30">
-          <div className="absolute w-full h-full bg-white animate-lightning opacity-0"></div>
-        </div>
-      )}
-  
-      <div
-        ref={containerRef}
-        className="relative w-[6000px] h-[10000px] overflow-auto bg-gradient-to-br from-green-900 via-green-800 to-gray-900"
-      >
-        <div className="fixed top-4 right-4 z-50 space-x-2 bg-black/30 px-3 py-2 rounded-xl border border-white/20 text-sm">
-          <button onClick={() => setWeatherMode("sunny")} className="hover:underline">☀️ Sunny</button>
-          <button onClick={() => setWeatherMode("rainy")} className="hover:underline">🌧️ Rain</button>
-          <button onClick={() => setWeatherMode("snowy")} className="hover:underline">❄️ Snow</button>
-          <button onClick={() => setWeatherMode("breezy")} className="hover:underline">🍃 Breezy</button>
-          <button onClick={() => setWeatherMode("storm")} className="hover:underline">⛈️ Storm</button>
-        </div>
-  
-        <div className="container mx-auto px-4">
-          <VisitorGardenUI 
-            onAddPlant={addPlant} 
-            plantCount={plants.length} 
-            onViewStats={() => setIsStatsOpen(true)}
-          />
-  
-          <StatsModal 
-            isOpen={isStatsOpen}
-            onClose={() => setIsStatsOpen(false)}
-            plants={plants}
-          />
-  
-          <div className="garden-container pb-8 pt-4 relative flex flex-col items-center justify-center bg-transparent">
-            <h2 className="text-2xl font-bold text-white mb-4 text-center">🌍 Global Garden</h2>
-            <PlantGlobe plants={plants} />
           </div>
         </div>
       </div>
     </div>
   );
 }
+
 export default App;
